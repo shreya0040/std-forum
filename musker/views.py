@@ -15,7 +15,7 @@ def home(request):
                 meep = form.save(commit=False)
                 meep.user = request.user
                 meep.save()
-                messages.success(request, "Your Meep Has Been Posted!")
+                messages.success(request, "Your Message Has Been Posted!")
                 return redirect('home')
 
         meeps = Meep.objects.all().order_by("-created_at")
@@ -131,7 +131,7 @@ def login_user(request):
 		user = authenticate(request, username=username, password=password)
 		if user is not None:
 			login(request, user)
-			messages.success(request, ("You Have Been Logged In!  Get MEEPING!"))
+			messages.success(request, ("You Have Been Logged In!  Get POSTING!"))
 			return redirect('home')
 		else:
 			messages.success(request, ("There was an error logging in. Please Try Again..."))
@@ -143,27 +143,29 @@ def login_user(request):
 
 def logout_user(request):
 	logout(request)
-	messages.success(request, ("You Have Been Logged Out. Sorry to Meep You Go..."))
+	messages.success(request, ("You Have Been Logged Out. Sorry to See You Go..."))
 	return redirect('home')
 
 def register_user(request):
-	form = SignUpForm()
-	if request.method == "POST":
-		form = SignUpForm(request.POST)
-		if form.is_valid():
-			form.save()
-			username = form.cleaned_data['username']
-			password = form.cleaned_data['password1']
-			# first_name = form.cleaned_data['first_name']
-			# second_name = form.cleaned_data['second_name']
-			# email = form.cleaned_data['email']
-			# Log in user
-			user = authenticate(username=username, password=password)
-			login(request,user)
-			messages.success(request, ("You have successfully registered! Welcome!"))
-			return redirect('home')
-	
-	return render(request, "register.html", {'form':form})
+    form = SignUpForm()
+
+    if request.method == "POST":
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()  # This returns the User object
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+
+            # Optional: If you have a Profile model linked via OneToOneField
+            Profile.objects.create(user=user)  # ✅ user, not user.id
+
+            # Authenticate and login
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            messages.success(request, "You have successfully registered! Welcome!")
+            return redirect('home')
+
+    return render(request, "register.html", {'form': form})
 
 
 def update_user(request):
@@ -209,7 +211,7 @@ def meep_show(request, pk):
 	if meep:
 		return render(request, "show_meep.html", {'meep':meep})
 	else:
-		messages.success(request, ("That Meep Does Not Exist..."))
+		messages.success(request, ("That Post Does Not Exist..."))
 		return redirect('home')		
 
 
@@ -221,10 +223,10 @@ def delete_meep(request, pk):
 			# Delete The Meep
 			meep.delete()
 			
-			messages.success(request, ("The Meep Has Been Deleted!"))
+			messages.success(request, ("The Post Has Been Deleted!"))
 			return redirect(request.META.get("HTTP_REFERER"))	
 		else:
-			messages.success(request, ("You Don't Own That Meep!!"))
+			messages.success(request, ("You Don't Own That Post!!"))
 			return redirect('home')
 
 	else:
@@ -246,13 +248,13 @@ def edit_meep(request,pk):
 					meep = form.save(commit=False)
 					meep.user = request.user
 					meep.save()
-					messages.success(request, ("Your Meep Has Been Updated!"))
+					messages.success(request, ("Your Post Has Been Updated!"))
 					return redirect('home')
 			else:
 				return render(request, "edit_meep.html", {'form':form, 'meep':meep})
 	
 		else:
-			messages.success(request, ("You Don't Own That Meep!!"))
+			messages.success(request, ("You Don't Own That Post!!"))
 			return redirect('home')
 
 	else:
