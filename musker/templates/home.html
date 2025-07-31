@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Main Container for the Page -->
+<div class="container py-5">
+
+  <!-- Header Section -->
+  <div class="text-center mb-4">
+    <h1 class="display-4" style="font-family: 'Arial', sans-serif; color: #2c3e50;">Posts</h1>
+    <p class="lead" style="font-size: 1.2rem; color: #7f8c8d;">Check out the latest posts and join the conversation.</p>
+  </div>
+
+  <!-- Meeps Section (Left Side Column) -->
+  <div class="row">
+    <div class="col-lg-8">
+
+      <!-- Loop to display all meeps -->
+      {% for meep in meeps %}
+      <div class="alert alert-light mb-4 p-4 rounded shadow-sm">
+        <div class="container">
+          <div class="row">
+            <!-- User Profile Image -->
+            <div class="col-2 d-flex justify-content-center">
+              {% if meep.user.profile.profile_image %}
+              <img src="{{ meep.user.profile.profile_image.url }}" width="50" height="50" class="rounded-circle" alt="{{ meep.user.username }}">
+              {% else %}
+              <img src="{% static 'images/default_profile_pic.png' %}" width="50" height="50" class="rounded-circle" alt="{{ meep.user.username }}">
+              {% endif %}
+            </div>
+
+            <!-- Meep Content -->
+            <div class="col-10">
+              <p class="lead" style="font-size: 1.1rem;">{{ meep.body }}</p>
+
+              <!-- Display uploaded file -->
+              {% if meep.file %}
+              <div class="mb-2">
+                <a href="{{ meep.file.url }}" class="btn btn-secondary" download>Download File</a>
+              </div>
+              {% endif %}
+
+              <!-- Meep Footer (Like, Share, Time) -->
+              <small class="text-muted d-block mb-2">
+                <span>({{ meep.created_at }}) by <strong>@{{ meep.user.username }}</strong></span>
+                <span class="ms-3">{{ meep.number_of_likes }} Likes</span>
+              </small>
+
+              <!-- Like Button -->
+              {% if user in meep.likes.all %}
+              <a href="{% url 'meep_like' meep.id %}">
+                <i class="fa-solid fa-heart" style="color:red; cursor: pointer;"></i>
+              </a>
+              {% else %}
+              <a href="{% url 'meep_like' meep.id %}">
+                <i class="fa fa-heart-o" style="color:red; cursor: pointer;"></i>
+              </a>
+              {% endif %}
+
+              <!-- Share Button -->
+              <a href="{% url 'meep_show' meep.id %}" class="ms-3">
+                <i class="fa-solid fa-share" style="color: #7f8c8d; cursor: pointer;"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Post Meep Section (Right Side Column) -->
+    <div class="col-lg-4">
+      <div class="mb-4">
+        {% if form %}
+        <div class="card p-4 shadow-sm rounded">
+          <h5 class="card-title mb-3">Post!</h5>
+          <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary w-100 py-2">Post</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
