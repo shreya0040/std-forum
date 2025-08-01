@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.utils import timezone
 
 # Create Meep model
 from django.db import models
@@ -74,4 +75,27 @@ def create_profile(sender, instance, created, **kwargs):
 # Connect the signal to the User model
 post_save.connect(create_profile, sender=User)
 
+class Notification(models.Model):
+    NOTIFY_LIKE = 'like'
+    NOTIFY_COMMENT = 'comment'
+    NOTIFY_FOLLOW = 'follow'
+
+    NOTIFICATION_TYPES = [
+        (NOTIFY_LIKE, 'Like'),
+        (NOTIFY_COMMENT, 'Comment'),
+        (NOTIFY_FOLLOW, 'Follow'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.CharField(max_length=255)
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    meep = models.ForeignKey(Meep, on_delete=models.CASCADE, null=True, blank=True)  # Optional, only for post-related notifications
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)  # Add this field to track read status
+
+    def __str__(self):
+        return f"Notification for {self.user.username} - {self.notification_type}"
+
+    class Meta:
+        ordering = ['-created_at']
 

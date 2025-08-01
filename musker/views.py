@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Community, Comment
+from .models import Community, Comment, Notification
 from .forms import CommentForm
 
 
@@ -14,6 +14,8 @@ from .forms import CommentForm
 def home(request):
     if request.user.is_authenticated:
         form = MeepForm(request.POST or None, request.FILES or None)  # Handle files here
+        
+        # Check if the form is submitted and valid
         if request.method == "POST":
             if form.is_valid():
                 meep = form.save(commit=False)
@@ -22,14 +24,30 @@ def home(request):
                 messages.success(request, "Your Message Has Been Posted!")
                 return redirect('home')
 
-        meeps = Meep.objects.all().order_by("-created_at")
-        communities = Community.objects.all()  # Display all communities on the home page
-        return render(request, 'home.html', {"meeps": meeps, "form": form, "communities": communities})
-    else:
+        # Get all meeps and communities to display on the home page
         meeps = Meep.objects.all().order_by("-created_at")
         communities = Community.objects.all()
-        return render(request, 'home.html', {"meeps": meeps, "communities": communities})
 
+        # Calculate unread notifications count
+        unread_notifications = Notification.objects.filter(user=request.user, is_read=False).count()
+
+        # Pass the unread_notifications count to the template
+        return render(request, 'home.html', {
+            "meeps": meeps,
+            "form": form,
+            "communities": communities,
+            "unread_notifications": unread_notifications  # Pass this to the template
+        })
+    
+    else:
+        # If the user is not authenticated, just get meeps and communities without the form
+        meeps = Meep.objects.all().order_by("-created_at")
+        communities = Community.objects.all()
+
+        return render(request, 'home.html', {
+            "meeps": meeps,
+            "communities": communities
+        })
 
 
 def profile_list(request):
@@ -195,22 +213,38 @@ def update_user(request):
 		return redirect('home')
 	
 def meep_like(request, pk):
-	if request.user.is_authenticated:
-		meep = get_object_or_404(Meep, id=pk)
-		if meep.likes.filter(id=request.user.id):
-			meep.likes.remove(request.user)
-		else:
-			meep.likes.add(request.user)
-		
-		return redirect(request.META.get("HTTP_REFERER"))
+    # Ensure the user is authenticated
+    if request.user.is_authenticated:
+        # Fetch the Meep post based on the provided primary key
+        meep = get_object_or_404(Meep, id=pk)
 
+        # Check if the user has already liked the Meep
+        if meep.likes.filter(id=request.user.id).exists():  # User has already liked the post
+            meep.likes.remove(request.user)  # Remove the like
+            message = "You have unliked this post."
+        else:
+            meep.likes.add(request.user)  # Add the like
+            message = "You have liked this post."
 
+            # Create a notification for the Meep owner (if the user is not the Meep owner)
+            if meep.user != request.user:  # Don't send a notification if the user likes their own post
+                Notification.objects.create(
+                    user=meep.user,
+                    message=f"{request.user.username} liked your post.",
+                    notification_type=Notification.NOTIFY_LIKE,
+                    meep=meep
+                )
 
+        # Show a success message based on the action (like/unlike)
+        messages.success(request, message)
 
-	else:
-		messages.success(request, ("You Must Be Logged In To View That Page..."))
-		return redirect('home')
-
+        # Redirect back to the previous page (where the user came from)
+        return redirect(request.META.get("HTTP_REFERER", "home"))
+    
+    else:
+        # If the user is not authenticated, show an error message
+        messages.error(request, "You must be logged in to like a post.")
+        return redirect('login')  # Redirect to login page
 
 def meep_show(request, pk):
     meep = get_object_or_404(Meep, id=pk)
@@ -362,15 +396,51 @@ def unjoin_community(request, pk):
 
 def comment_on_meep(request, pk):
     meep = get_object_or_404(Meep, id=pk)
+    
+    # Check if the request is a POST and the user is authenticated
     if request.method == "POST" and request.user.is_authenticated:
         form = CommentForm(request.POST)
         if form.is_valid():
+            # Create and save the comment
             comment = form.save(commit=False)
             comment.user = request.user
             comment.meep = meep
             comment.save()
+            
+            # Create a notification for the Meep owner (if the user is not the owner)
+            if meep.user != request.user:  # Don't send a notification to the Meep owner if they commented
+                Notification.objects.create(
+                    user=meep.user,
+                    message=f"{request.user.username} commented on your post.",
+                    notification_type=Notification.NOTIFY_COMMENT,
+                    meep=meep
+                )
+            
+            # Success message for posting a comment
             messages.success(request, "Your comment has been posted!")
             return redirect('meep_show', pk=meep.pk)
+    
     else:
+        # If GET request, initialize an empty form
         form = CommentForm()
+
+    # Render the comment form
     return render(request, "comment_form.html", {'form': form, 'meep': meep})
+
+def notifications(request):
+    if request.user.is_authenticated:
+        notifications = Notification.objects.filter(user=request.user).order_by('-created_at')
+
+        # Mark only the clicked notification as read (optional feature)
+        if 'notification_id' in request.GET:
+            notification_id = request.GET['notification_id']
+            Notification.objects.filter(id=notification_id).update(is_read=True)
+
+        unread_notifications = notifications.filter(is_read=False).count()
+
+        return render(request, 'notifications.html', {
+            'notifications': notifications,
+            'unread_notifications': unread_notifications
+        })
+    else:
+        return redirect('home')

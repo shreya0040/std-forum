@@ -25,6 +25,7 @@ urlpatterns = [
     path('community/<int:pk>/', views.community_detail, name='community_detail'),
     path('community/<int:pk>/unjoin/', views.unjoin_community, name='unjoin_community'),
     path('meep/<int:pk>/comment/', views.comment_on_meep, name='comment_on_meep'),
+     path('notifications/', views.notifications, name='notifications'),
 
 
 

@@ -16,37 +16,33 @@
         </li>
 
         <li class="nav-item">
-  <a class="nav-link" href="{% url 'community_list' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Communities</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="{% url 'create_community' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Create Community</a>
-</li>
-
-        
-        <!-- Profile List Link -->
+          <a class="nav-link" href="{% url 'community_list' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Communities</a>
+        </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'profile_list' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Find Friends</a>
+          <a class="nav-link" href="{% url 'create_community' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Create Community</a>
+        </li>
+      </ul>
+
+      <!-- Navbar Items on the Right -->
+      <div class="navbar-nav ms-auto ms-3 d-flex align-items-center">
+
+        <!-- Notification Icon -->
+        <li class="nav-item position-relative">
+          <a class="nav-link" href="{% url 'notifications' %}" style="padding: 10px 15px;">
+            <i class="fa-solid fa-bell" style="font-size: 1.3rem;"></i>
+            {% if unread_notifications > 0 %}
+              <span class="badge bg-danger" style="position: absolute; top: 0; right: 0; font-size: 0.7rem; padding: 0.3em 0.6em;">{{ unread_notifications }}</span>
+            {% endif %}
+          </a>
         </li>
 
-        <!-- Authentication Links (Login, Register, Logout) -->
+        <!-- Logout Link -->
         {% if user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link" href="{% url 'logout' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Logout</a>
           </li>
-        {% else %}
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'register' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Register</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Login</a>
-          </li>
         {% endif %}
-        
-        <!-- Search Link -->
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'search' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Search</a>
-        </li>
-      </ul>
+      </div>
 
       <!-- Profile Picture Section (if logged in) -->
       {% if user.is_authenticated %}
@@ -61,7 +57,7 @@
             </a>
           </li>
         </ul>
-      {% endif %} 
+      {% endif %}
     </div>
   </div>
 </nav>

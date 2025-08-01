@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+  <h2>Your Notifications</h2>
+
+  {% if notifications %}
+    {% for notification in notifications %}
+      <div class="card mb-3 {% if not notification.is_read %}bg-light{% endif %}">
+        <div class="card-body">
+          <p>{{ notification.message }}</p>
+          <small class="text-muted">{{ notification.created_at|date:"F j, Y, g:i a" }}</small>
+
+          {% if not notification.is_read %}
+            <span class="badge bg-warning text-dark ms-2">Unread</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>No notifications yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
