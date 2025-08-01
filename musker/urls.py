@@ -19,6 +19,12 @@ urlpatterns = [
     path('delete_meep/<int:pk>', views.delete_meep, name="delete_meep"),
     path('edit_meep/<int:pk>', views.edit_meep, name="edit_meep"),
     path('search/', views.search, name='search'),
+    path('communities/', views.community_list, name='community_list'),
+    path('create_community/', views.create_community, name='create_community'),
+    path('join_community/<int:pk>/', views.join_community, name='join_community'),
+    path('community/<int:pk>/', views.community_detail, name='community_detail'),
+    path('community/<int:pk>/unjoin/', views.unjoin_community, name='unjoin_community'),
+
 
 
 ]

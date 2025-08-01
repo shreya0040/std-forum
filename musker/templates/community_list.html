@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container mt-5">
+        <h1 class="text-center">Communities</h1>
+        <div class="row">
+            {% for community in communities %}
+                <div class="col-md-4">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ community.name }}</h5>
+                            <p class="card-text">{{ community.description|truncatewords:20 }}</p>
+                            <a href="{% url 'community_detail' community.pk %}" class="btn btn-info">View Community</a>
+                            {% if community in user.joined_communities.all %}
+                                <!-- Unjoin Button -->
+                                <a href="{% url 'unjoin_community' community.pk %}" class="btn btn-danger mt-2">Unjoin Community</a>
+                            {% else %}
+                                <!-- Join Button -->
+                                <a href="{% url 'join_community' community.pk %}" class="btn btn-primary mt-2">Join Community</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import Profile, Meep
+from .models import Profile, Meep, Community
 from .forms import MeepForm, SignUpForm, ProfilePicForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.contrib.auth.models import User
+from .models import Community
+
 
 def home(request):
     if request.user.is_authenticated:
@@ -19,10 +21,12 @@ def home(request):
                 return redirect('home')
 
         meeps = Meep.objects.all().order_by("-created_at")
-        return render(request, 'home.html', {"meeps": meeps, "form": form})
+        communities = Community.objects.all()  # Display all communities on the home page
+        return render(request, 'home.html', {"meeps": meeps, "form": form, "communities": communities})
     else:
         meeps = Meep.objects.all().order_by("-created_at")
-        return render(request, 'home.html', {"meeps": meeps})
+        communities = Community.objects.all()
+        return render(request, 'home.html', {"meeps": meeps, "communities": communities})
 
 
 
@@ -273,3 +277,73 @@ def search(request):
 		return render(request, 'search.html', {'search':search, 'searched':searched})
 	else:
 		return render(request, 'search.html', {})
+	
+def join_community(request, pk):
+    community = get_object_or_404(Community, pk=pk)
+    if request.user not in community.members.all():
+        community.members.add(request.user)
+        messages.success(request, f"You have successfully joined the '{community.name}' community!")
+    else:
+        messages.info(request, f"You are already a member of the '{community.name}' community.")
+    return redirect('community_list')
+
+def community_detail(request, pk):
+    # Fetch the community based on the primary key (pk)
+    community = get_object_or_404(Community, pk=pk)
+
+    # Get all the posts (Meep) associated with the community
+    meeps = Meep.objects.filter(community=community).order_by("-created_at")
+
+    # Handle the creation of a new Meep post
+    if request.method == "POST":
+        if request.user in community.members.all():  # Ensure user is a member
+            body = request.POST.get("body")
+            if body:
+                Meep.objects.create(
+                    body=body,
+                    user=request.user,
+                    community=community
+                )
+                messages.success(request, "Your post has been created!")
+                return redirect('community_detail', pk=community.pk)
+            else:
+                messages.error(request, "Post content cannot be empty.")
+        else:
+            messages.warning(request, "You must join the community to post.")
+            return redirect('community_list')  # Redirect to community list if not a member
+
+    return render(request, 'community_detail.html', {
+        'community': community,
+        'meeps': meeps
+    })
+
+def community_list(request):
+    communities = Community.objects.all()
+    return render(request, 'community_list.html', {"communities": communities})
+
+# Create a new community
+def create_community(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        
+        community = Community(
+            name=name,
+            description=description,
+            creator=request.user
+        )
+        community.save()
+        
+        messages.success(request, f"Community '{name}' created successfully!")
+        return redirect('community_list')  # Redirect to the community list page
+    return render(request, 'create_community.html')
+
+
+def unjoin_community(request, pk):
+    community = get_object_or_404(Community, pk=pk)
+    if request.user in community.members.all():
+        community.members.remove(request.user)
+        messages.success(request, f"You have successfully left the '{community.name}' community!")
+    else:
+        messages.warning(request, f"You are not a member of the '{community.name}' community.")
+    return redirect('community_list')  # Redirect back to the community list page
