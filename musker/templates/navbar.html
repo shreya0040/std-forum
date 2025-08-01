@@ -1,42 +1,42 @@
 {% load static %}
-<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2c3e50;">
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2c3e50; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
   <div class="container-fluid">
     <!-- Brand Name: KHEC Forum -->
-    <a class="navbar-brand" href="{% url 'home' %}" style="font-weight: bold; font-size: 1.7rem; color: #ffffff;">KHEC Forum</a>
+    <a class="navbar-brand" href="{% url 'home' %}" style="font-weight: bold; font-size: 1.8rem; color: #ffffff; letter-spacing: 1px;">KHEC Forum</a>
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+      <span class="navbar-toggler-icon" style="background-color: #ffffff;"></span>
     </button>
     
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <!-- Home Link -->
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'home' %}" style="font-size: 1.1rem;">Home</a>
+          <a class="nav-link" href="{% url 'home' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Home</a>
         </li>
         
         <!-- Profile List Link -->
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'profile_list' %}" style="font-size: 1.1rem;">Profile List</a>
+          <a class="nav-link" href="{% url 'profile_list' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Find Friends</a>
         </li>
 
         <!-- Authentication Links (Login, Register, Logout) -->
         {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'logout' %}" style="font-size: 1.1rem;">Logout</a>
+            <a class="nav-link" href="{% url 'logout' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Logout</a>
           </li>
         {% else %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'register' %}" style="font-size: 1.1rem;">Register</a>
+            <a class="nav-link" href="{% url 'register' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Register</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}" style="font-size: 1.1rem;">Login</a>
+            <a class="nav-link" href="{% url 'login' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Login</a>
           </li>
         {% endif %}
         
         <!-- Search Link -->
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'search' %}" style="font-size: 1.1rem;">Search</a>
+          <a class="nav-link" href="{% url 'search' %}" style="font-size: 1.1rem; transition: color 0.3s; padding: 10px 15px;">Search</a>
         </li>
       </ul>
 
@@ -46,9 +46,9 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'profile' request.user.id %}">
               {% if user.profile.profile_image %}
-                <img src="{{ user.profile.profile_image.url }}" class="rounded-circle" width="35" height="35" style="border: 2px solid #ffffff;">
+                <img src="{{ user.profile.profile_image.url }}" class="rounded-circle border border-2 border-white shadow-sm" width="40" height="40" style="object-fit: cover;">
               {% else %}
-                <img src="{% static 'images/default_profile_pic.png' %}" class="img-fluid rounded-circle" alt="Profile Image" width="35" height="35" style="border: 2px solid #ffffff;">
+                <img src="{% static 'images/default_profile_pic.png' %}" class="img-fluid rounded-circle border border-2 border-white shadow-sm" alt="Profile Image" width="40" height="40" style="object-fit: cover;">
               {% endif %}
             </a>
           </li>

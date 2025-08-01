@@ -17,24 +17,36 @@ class ProfilePicForm(forms.ModelForm):
 		model = Profile
 		fields = ('profile_image', 'profile_bio', 'homepage_link', 'facebook_link', 'instagram_link', 'linkedin_link', )
 
+
+
 class MeepForm(forms.ModelForm):
     body = forms.CharField(
         required=True, 
         widget=forms.widgets.Textarea(
             attrs={
-                "placeholder": "Enter Your Post!",
-                "class": "form-control",
+                "placeholder": "Share your thoughts, ideas, or questions",  # Friendly and inviting placeholder
+                "class": "form-control rounded-3",  # Rounded corners for a softer look
+                "rows": 6,  # More space to type, looks cleaner on the page
+                "style": "resize: none;",  # Disable resizing of the textarea
             }
         ),
         label="",
     )
     
-    # Add a file field for uploading files (same as the Meep model)
-    file = forms.FileField(required=False, widget=forms.ClearableFileInput(attrs={'class': 'form-control'}), label="Upload a File (optional)")
+    file = forms.FileField(
+        required=False, 
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control rounded-3',  # Matching the styling with rounded corners
+            'placeholder': 'Choose a file to upload (optional)',  # Friendly file upload placeholder
+            'accept': 'image/*, .pdf',  # Restrict file types (optional, just an example)
+        }), 
+        label="Upload a File (optional)",
+    )
 
     class Meta:
         model = Meep
         exclude = ("user", "likes",)
+
 
 
 

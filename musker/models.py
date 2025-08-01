@@ -53,9 +53,8 @@ def create_profile(sender, instance, created, **kwargs):
         # Create the profile for the user
         user_profile = Profile(user=instance)
         user_profile.save()
-        # Have the user follow themselves
-        user_profile.follows.set([instance])  # Set the user to follow themselves
+
+        # Have the user follow themselves by adding their user instance to 'follows'
+        user_profile.follows.set([instance])  # Use the instance directly
         user_profile.save()
 
-# Connect the signal to the User model
-post_save.connect(create_profile, sender=User)

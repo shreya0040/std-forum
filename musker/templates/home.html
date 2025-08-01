@@ -6,8 +6,8 @@
 <div class="container py-5">
 
   <!-- Header Section -->
-  <div class="text-center mb-4">
-    <h1 class="display-4" style="font-family: 'Arial', sans-serif; color: #2c3e50;">Posts</h1>
+  <div class="text-center mb-5">
+    <h1 class="display-4" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #2c3e50;">Posts</h1>
     <p class="lead" style="font-size: 1.2rem; color: #7f8c8d;">Check out the latest posts and join the conversation.</p>
   </div>
 
@@ -17,43 +17,43 @@
 
       <!-- Loop to display all meeps -->
       {% for meep in meeps %}
-      <div class="alert alert-light mb-4 p-4 rounded shadow-sm">
+      <div class="alert alert-light mb-4 p-4 rounded shadow-sm transition-shadow">
         <div class="container">
           <div class="row">
             <!-- User Profile Image -->
-            <div class="col-2 d-flex justify-content-center">
+            <div class="col-2 d-flex justify-content-center align-items-center">
               {% if meep.user.profile.profile_image %}
-              <img src="{{ meep.user.profile.profile_image.url }}" width="50" height="50" class="rounded-circle" alt="{{ meep.user.username }}">
+              <img src="{{ meep.user.profile.profile_image.url }}" width="50" height="50" class="rounded-circle border border-3 border-primary" alt="{{ meep.user.username }}">
               {% else %}
-              <img src="{% static 'images/default_profile_pic.png' %}" width="50" height="50" class="rounded-circle" alt="{{ meep.user.username }}">
+              <img src="{% static 'images/default_profile_pic.png' %}" width="50" height="50" class="rounded-circle border border-3 border-primary" alt="{{ meep.user.username }}">
               {% endif %}
             </div>
 
             <!-- Meep Content -->
             <div class="col-10">
-              <p class="lead" style="font-size: 1.1rem;">{{ meep.body }}</p>
+              <p class="lead" style="font-size: 1.1rem; color: #34495e;">{{ meep.body }}</p>
 
               <!-- Display uploaded file -->
               {% if meep.file %}
               <div class="mb-2">
-                <a href="{{ meep.file.url }}" class="btn btn-secondary" download>Download File</a>
+                <a href="{{ meep.file.url }}" class="btn btn-outline-primary" download>Download File</a>
               </div>
               {% endif %}
 
               <!-- Meep Footer (Like, Share, Time) -->
-              <small class="text-muted d-block mb-2">
+              <small class="text-muted d-block mb-2" style="font-size: 0.9rem;">
                 <span>({{ meep.created_at }}) by <strong>@{{ meep.user.username }}</strong></span>
                 <span class="ms-3">{{ meep.number_of_likes }} Likes</span>
               </small>
 
               <!-- Like Button -->
               {% if user in meep.likes.all %}
-              <a href="{% url 'meep_like' meep.id %}">
-                <i class="fa-solid fa-heart" style="color:red; cursor: pointer;"></i>
+              <a href="{% url 'meep_like' meep.id %}" class="meep-like-button">
+                <i class="fa-solid fa-heart" style="color: #e74c3c; cursor: pointer;"></i>
               </a>
               {% else %}
-              <a href="{% url 'meep_like' meep.id %}">
-                <i class="fa fa-heart-o" style="color:red; cursor: pointer;"></i>
+              <a href="{% url 'meep_like' meep.id %}" class="meep-like-button">
+                <i class="fa fa-heart-o" style="color: #e74c3c; cursor: pointer;"></i>
               </a>
               {% endif %}
 
@@ -72,12 +72,12 @@
     <div class="col-lg-4">
       <div class="mb-4">
         {% if form %}
-        <div class="card p-4 shadow-sm rounded">
-          <h5 class="card-title mb-3">Post!</h5>
+        <div class="card p-4 shadow-sm rounded transition-shadow">
+          <h5 class="card-title mb-3" style="font-family: 'Segoe UI', sans-serif;">Post</h5>
           <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit" class="btn btn-primary w-100 py-2">Post</button>
+            <button type="submit" class="btn btn-primary w-100 py-2 hover-shadow">Post</button>
           </form>
         </div>
         {% endif %}
@@ -86,5 +86,71 @@
   </div>
 
 </div>
+
+
+
+<style>
+  /* Adding smooth transition for elements */
+  .transition-shadow {
+    transition: box-shadow 0.3s ease-in-out;
+  }
+
+  .transition-shadow:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Post Content Styling */
+  .lead {
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+  }
+
+  /* Button Styling */
+  .btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+    transition: background-color 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+  }
+
+  .btn-outline-primary {
+    border-color: #3498db;
+    color: #3498db;
+    transition: border-color 0.3s ease, color 0.3s ease;
+  }
+
+  .btn-outline-primary:hover {
+    border-color: #2980b9;
+    color: #2980b9;
+  }
+
+  /* Like Button Animation */
+  .meep-like-button i {
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .meep-like-button i:hover {
+    transform: scale(1.1);
+  }
+
+  /* Profile Image Border */
+  .rounded-circle {
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+
+  .rounded-circle:hover {
+    transform: scale(1.05);
+  }
+
+  /* For the small text under the meep */
+  .text-muted {
+    color: #7f8c8d !important;
+  }
+</style>
 
 {% endblock %}
