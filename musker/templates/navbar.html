@@ -20,6 +20,13 @@
           <a class="nav-link" href="{% url 'profile_list' %}" style="font-size: 1.1rem;">Profile List</a>
         </li>
 
+        <!-- Chat Link (only if logged in) -->
+        {% if user.is_authenticated %}
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'directs' username=user.username %}" style="font-size: 1.1rem;">Chat</a>
+        </li>
+        {% endif %}
+
         <!-- Authentication Links (Login, Register, Logout) -->
         {% if user.is_authenticated %}
           <li class="nav-item">

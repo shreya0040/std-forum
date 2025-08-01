@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 
 
@@ -19,6 +19,7 @@ urlpatterns = [
     path('delete_meep/<int:pk>', views.delete_meep, name="delete_meep"),
     path('edit_meep/<int:pk>', views.edit_meep, name="edit_meep"),
     path('search/', views.search, name='search'),
+    path('message/', include('chats.urls')),
 
 
 ]
