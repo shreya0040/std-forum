@@ -6,7 +6,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Community
+from .models import Community, Comment
+from .forms import CommentForm
+
 
 
 def home(request):
@@ -211,12 +213,21 @@ def meep_like(request, pk):
 
 
 def meep_show(request, pk):
-	meep = get_object_or_404(Meep, id=pk)
-	if meep:
-		return render(request, "show_meep.html", {'meep':meep})
-	else:
-		messages.success(request, ("That Post Does Not Exist..."))
-		return redirect('home')		
+    meep = get_object_or_404(Meep, id=pk)
+    
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.meep = meep
+            comment.save()
+            messages.success(request, "Your comment has been posted!")
+            return redirect('meep_show', pk=meep.pk)
+    else:
+        form = CommentForm()
+
+    return render(request, 'show_meep.html', {'meep': meep, 'form': form})
 
 
 def delete_meep(request, pk):
@@ -347,3 +358,19 @@ def unjoin_community(request, pk):
     else:
         messages.warning(request, f"You are not a member of the '{community.name}' community.")
     return redirect('community_list')  # Redirect back to the community list page
+
+
+def comment_on_meep(request, pk):
+    meep = get_object_or_404(Meep, id=pk)
+    if request.method == "POST" and request.user.is_authenticated:
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.meep = meep
+            comment.save()
+            messages.success(request, "Your comment has been posted!")
+            return redirect('meep_show', pk=meep.pk)
+    else:
+        form = CommentForm()
+    return render(request, "comment_form.html", {'form': form, 'meep': meep})

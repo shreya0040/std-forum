@@ -2,6 +2,7 @@ from django import forms
 from .models import Meep, Profile
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import Comment
 
 
 # Profile Extras Form
@@ -48,7 +49,10 @@ class MeepForm(forms.ModelForm):
         exclude = ("user", "likes",)
 
 
-
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ['body']
 
 class SignUpForm(UserCreationForm):
 	email = forms.EmailField(label="", widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Email Address'}))

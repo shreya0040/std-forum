@@ -33,7 +33,14 @@ class Meep(models.Model):
     def __str__(self):
         return f"{self.user.username} ({self.created_at:%Y-%m-%d %H:%M}): {self.body}"
 
+class Comment(models.Model):
+    meep = models.ForeignKey(Meep, related_name='comments', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.meep.body[:30]}"
 
 # Create A User Profile Model
 class Profile(models.Model):
