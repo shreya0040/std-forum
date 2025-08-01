@@ -11,6 +11,7 @@ class Community(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_communities")
+    creator = models.ForeignKey(User, on_delete=models.CASCADE)
     members = models.ManyToManyField(User, related_name="joined_communities", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -34,6 +35,15 @@ class Meep(models.Model):
         return f"{self.user.username} ({self.created_at:%Y-%m-%d %H:%M}): {self.body}"
 
 
+class Comment(models.Model):
+    meep = models.ForeignKey(Meep, related_name='comments', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.meep.body[:30]}"
+    
 
 # Create A User Profile Model
 class Profile(models.Model):
@@ -61,7 +71,7 @@ def create_profile(sender, instance, created, **kwargs):
         user_profile = Profile(user=instance)
         user_profile.save()
         # Have the user follow themselves
-        user_profile.follows.set([instance])  # Set the user to follow themselves
+        # user_profile.follows.set([instance])  # Set the user to follow themselves
         user_profile.save()
 
 # Connect the signal to the User model

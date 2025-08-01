@@ -6,7 +6,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from django.contrib.auth.models import User
-from .models import Community
+from .models import Community, Comment
+from .forms import CommentForm
 
 
 def home(request):
@@ -211,12 +212,21 @@ def meep_like(request, pk):
 
 
 def meep_show(request, pk):
-	meep = get_object_or_404(Meep, id=pk)
-	if meep:
-		return render(request, "show_meep.html", {'meep':meep})
-	else:
-		messages.success(request, ("That Post Does Not Exist..."))
-		return redirect('home')		
+    meep = get_object_or_404(Meep, id=pk)
+    
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.meep = meep
+            comment.save()
+            messages.success(request, "Your comment has been posted!")
+            return redirect('meep_show', pk=meep.pk)
+    else:
+        form = CommentForm()
+
+    return render(request, 'show_meep.html', {'meep': meep, 'form': form})
 
 
 def delete_meep(request, pk):
@@ -323,27 +333,58 @@ def community_list(request):
 
 # Create a new community
 def create_community(request):
+    if not request.user.is_authenticated:
+        messages.success(request, "You Must Be Logged In To View This Page...")
+        return redirect('home')
+
     if request.method == "POST":
         name = request.POST.get('name')
         description = request.POST.get('description')
-        
-        community = Community(
+
+        # ✅ First, save the Community so it gets an ID
+        community = Community.objects.create(
             name=name,
             description=description,
             creator=request.user
         )
-        community.save()
-        
-        messages.success(request, f"Community '{name}' created successfully!")
-        return redirect('community_list')  # Redirect to the community list page
+
+        # ✅ Then, safely add the creator as a member
+        community.members.add(request.user)
+
+        messages.success(request, f"Community '{name}' created and you've been added as a member!")
+        return redirect('community_list')
+    
     return render(request, 'create_community.html')
 
 
 def unjoin_community(request, pk):
     community = get_object_or_404(Community, pk=pk)
+
+    # 🚫 Prevent the creator from leaving their own community
+    if request.user == community.creator:
+        messages.error(request, f"You are the creator of '{community.name}' and cannot unjoin your own community.")
+        return redirect('community_list')
+
     if request.user in community.members.all():
         community.members.remove(request.user)
         messages.success(request, f"You have successfully left the '{community.name}' community!")
     else:
         messages.warning(request, f"You are not a member of the '{community.name}' community.")
+
     return redirect('community_list')  # Redirect back to the community list page
+
+
+def comment_on_meep(request, pk):
+    meep = get_object_or_404(Meep, id=pk)
+    if request.method == "POST" and request.user.is_authenticated:
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.user = request.user
+            comment.meep = meep
+            comment.save()
+            messages.success(request, "Your comment has been posted!")
+            return redirect('meep_show', pk=meep.pk)
+    else:
+        form = CommentForm()
+    return render(request, "comment_form.html", {'form': form, 'meep': meep})

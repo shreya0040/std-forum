@@ -2,65 +2,87 @@
 {% load static %}
 {% block content %}
 
+<div class="container mt-5">
+    <div class="row">
+        <!-- Meep Post Section -->
+        <div class="col-8">
+            <!-- Display the Meep post -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            {% if meep.user.profile.profile_image %}
+                                <img src="{{ meep.user.profile.profile_image.url }}" width="50" height="50" class="rounded-circle" alt="{{ meep.user.username }}">
+                            {% else %}
+                                <img src="{% static 'images/default_profile_pic.png' %}" width="50" height="50" class="rounded-circle" alt="{{ meep.user.username }}">
+                            {% endif %}
+                        </div>
+                        <div>
+                            <p class="fw-bold mb-1">{{ meep.user.username }}</p>
+                            <p class="text-muted small mb-2">{{ meep.created_at }}</p>
+                            <p>{{ meep.body }}</p>
 
-	<div class="container text-center">
-		<div class="row">
-			<div class="col-8">
+                            <div>
+                                <span class="text-muted">{{ meep.number_of_likes }} Likes</span> 
+                                {% if user in meep.likes.all %}
+                                    <a href="{% url 'meep_like' meep.id %}">
+                                        <i class="fa-solid fa-heart" style="color:red"></i>
+                                    </a>
+                                {% else %}
+                                    <a href="{% url 'meep_like' meep.id %}">
+                                        <i class="fa fa-heart-o" style="color:red"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- Comments Section -->
+            <div class="comments-section mt-4">
+                <h4>Comments</h4>
+                {% if meep.comments.all %}
+                    <ul class="list-unstyled">
+                        {% for comment in meep.comments.all %}
+                            <li class="comment mb-3">
+                                <div class="card shadow-sm">
+                                    <div class="card-body">
+                                        <p><strong>{{ comment.user.username }}</strong> said:</p>
+                                        <p>{{ comment.body }}</p>
+                                        <p class="text-muted small">Posted on {{ comment.created_at }}</p>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No comments yet. Be the first to comment!</p>
+                {% endif %}
+            </div>
 
-	
-<br/>
-	
-		<div class="alert alert-dark" role="alert">
-<div class="container">
-	<div class="row">
-		<div class="col-1">
-		  {% if meep.user.profile.profile_image %}
-				<img src="{{ meep.user.profile.profile_image.url }}" width=50 height=50 class="rounded-circle" alt="{{ profile.user.username }}">
+            <!-- Comment Form -->
+            {% if user.is_authenticated %}
+                <div class="mt-4">
+                    <h5>Leave a Comment:</h5>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <!-- Manually add Bootstrap class to the comment body field -->
+                            <textarea name="body" class="form-control" rows="4">{{ form.body.value }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Post Comment</button>
+                    </form>
+                </div>
+            {% else %}
+                <p>You must be logged in to comment.</p>
+            {% endif %}
+        </div>
 
-				{% else %}
-				<img src="{% static 'images/default_profile_pic.png' %}" width=50 height=50 class="rounded-circle" alt="{{ profile.user.username }}">	
-				{% endif %}
-		</div>
-
-		<div class="col-11">
-		  {{ meep.body }}<br/>
-		  <small class="text-muted">
-		  	({{ meep.created_at}}) By 
-		  	@{{ meep.user.username }}
-		  	- {{ meep.number_of_likes }} Likes - 
-
-		  	{% if user in meep.likes.all %}
-		  	  <a href="{% url 'meep_like' meep.id %}">
-	<i class="fa-solid fa-heart" style="color:red"></i>
-		  	  </a>
-		  	{% else %}
-		  		<a href="{% url 'meep_like' meep.id %}">
-		  <i class="fa fa-heart-o" style="color:red"></i>
-		  		</a>
-		  	{% endif %}
-
-		  </small>
-		</div><br/><br/>
-	
-			</div>
-		</div>
-	</div>
-	
-
-</div>
-
-<div class="col-4">
-				<br/><br/><br/>
-{% if form %}
-<form  method=POST>
-	{% csrf_token %}
-  	{{ form.as_p }}
-
-
-  <button type="submit" class="btn btn-secondary">Post Meep!</button>
-</form>
-{% endif %}
+       
+            </div>
+        </div>
+    </div>
 </div>
 
 {% endblock %}

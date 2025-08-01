@@ -46,6 +46,15 @@
         {% endif %}
     </div>
 
+ {% if request.user != community.creator %}
+    <form method="post" action="{% url 'unjoin_community' community.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Leave Community</button>
+    </form>
+{% else %}
+    <p class="text-muted"><em>You are the creator of this community and cannot leave it.</em></p>
+{% endif %}
+
     <style>
         /* Community Header Styling */
         .community-header h1 {
