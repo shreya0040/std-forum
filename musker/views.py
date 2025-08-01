@@ -341,14 +341,14 @@ def create_community(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
 
-        # ✅ First, save the Community so it gets an ID
+        # First, save the Community so it gets an ID
         community = Community.objects.create(
             name=name,
             description=description,
             creator=request.user
         )
 
-        # ✅ Then, safely add the creator as a member
+        # Then, safely add the creator as a member
         community.members.add(request.user)
 
         messages.success(request, f"Community '{name}' created and you've been added as a member!")
@@ -360,7 +360,7 @@ def create_community(request):
 def unjoin_community(request, pk):
     community = get_object_or_404(Community, pk=pk)
 
-    # 🚫 Prevent the creator from leaving their own community
+    #  Prevent the creator from leaving their own community
     if request.user == community.creator:
         messages.error(request, f"You are the creator of '{community.name}' and cannot unjoin your own community.")
         return redirect('community_list')
